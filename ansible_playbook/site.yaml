@@ -1,0 +1,36 @@
+---
+
+- hosts: all
+  become: yes
+  pre_tasks:
+
+  - name: update & upgrade slave server
+    apt: 
+      update_cache: yes
+      upgrade: yes
+
+  - name: Cron Job - Check server uptime every 12AM
+    cron:
+      name: Cron Job - Check server uptime every 12AM
+      minute: "0"
+      hour: "0"
+      day: "*"
+      month: "*"
+      weekday: "*"
+      job: "/usr/bin/uptime > /var/log/uptime_check.log 2>&1"
+      state: present
+
+  - name: copy the laravel script to slave machine
+    copy:
+      src: laravel.sh
+      dest: ~/
+      owner: root
+      group: root
+      mode: 0744
+
+  - name: Set Execute Permissions on the laravel Script
+    command: chmod +x ~/laravel.sh
+
+  - name: Run laravel Script
+    command: bash laravel.sh teni teni < /dev/null 
+
